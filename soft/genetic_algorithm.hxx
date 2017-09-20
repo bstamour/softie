@@ -22,10 +22,10 @@ namespace soft::ga {
 template <typename Iter, typename Distance, typename Generator, typename Func>
 void sample_and_apply(Iter first, Iter last, Distance n, Generator g, Func f)
 {
-  using value_type = std::remove_reference_t<Iter>::value_type;
-  vector<std::reference_wrapper<value_type>> refs;
+  using value_type = typename std::remove_reference_t<Iter>::value_type;
+  std::vector<std::reference_wrapper<value_type>> refs;
   refs.reserve(n);
-  std::sample(first, last, back_inserter(refs), n, g);
+  std::sample(first, last, std::back_inserter(refs), n, g);
   for (auto& x : refs)
     x.get() = f(x);
 }
@@ -67,8 +67,8 @@ auto run_genetic_algorithm(Pool const& pool,
 			   Generator gen,
 			   algorithm_traits const& traits)
 {
-  using item_type        = std::remove_reference_t<Pool>::value_type;
-  using score_type       = decltype (f(declval<item_type&>()));
+  using item_type        = typename std::remove_reference_t<Pool>::value_type;
+  using score_type       = decltype (f(std::declval<item_type&>()));
   using scored_item_type = std::pair<item_type*, score_type>;
 
   // Score the initial population.
