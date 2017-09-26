@@ -207,6 +207,26 @@ template <
   typename Out = typename VT::second_type>
 set(Iter, Iter) -> set<In, Out>;
 
+//------------------------------------------------------------------------------
+
+template <typename Set, typename N> auto cut(Set&& s, N const& alpha)
+{
+  using value_type = std::decay_t<Set>::value_type;
+  return set{ [=](value_type x) -> value_type {
+    return s(x) > alpha ? 1 : 0;
+  }};
+}
+
+
+
+
+
+
+
+
+
+
+
 } // namespace fuzzy
 
 #endif
