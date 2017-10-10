@@ -45,17 +45,17 @@ namespace traits {
 // Compute based on min/max.
 
 template <typename T> struct min_max {
-  constexpr auto and_(T const &x, T const &y) const { return std::min(x, y); }
-  constexpr auto or_(T const &x, T const &y) const { return std::max(x, y); }
-  constexpr auto not_(T const &x) const { return T{1} - x; }
+  constexpr auto and_(T const& x, T const& y) const { return std::min(x, y); }
+  constexpr auto or_(T const& x, T const& y) const { return std::max(x, y); }
+  constexpr auto not_(T const& x) const { return T{1} - x; }
 };
 
 // Compute based on multiplication.
 
 template <typename T> struct product {
-  constexpr auto and_(T const &x, T const &y) const { return x * y; }
-  constexpr auto or_(T const &x, T const &y) const { return x + y - x * y; }
-  constexpr auto not_(T const &x) const { return T{1} - x; }
+  constexpr auto and_(T const& x, T const& y) const { return x * y; }
+  constexpr auto or_(T const& x, T const& y) const { return x + y - x * y; }
+  constexpr auto not_(T const& x) const { return T{1} - x; }
 };
 } // namespace traits
 
@@ -76,35 +76,35 @@ public:
 
   template <typename U,
             typename = detail::enable_if_not_same_t<U, value<T, Traits>>>
-  explicit constexpr value(U &&val) : value_{std::forward<U>(val)}
+  explicit constexpr value(U&& val) : value_{std::forward<U>(val)}
   {
   }
 
   constexpr auto get() const { return value_; }
 
-  template <typename U> constexpr auto set(U &&x)
+  template <typename U> constexpr auto set(U&& x)
   {
     value_ = std::forward<U>(x);
   }
 
-  auto operator<(value const &rhs) const { return value_ < rhs.value_; }
-  auto operator==(value const &rhs) const { return value_ == rhs.value_; }
+  auto operator<(value const& rhs) const { return value_ < rhs.value_; }
+  auto operator==(value const& rhs) const { return value_ == rhs.value_; }
 
-  constexpr auto operator&&(value const &y) const
+  constexpr auto operator&&(value const& y) const
   {
     return value{and_(value_, y.value_)};
   }
-  constexpr auto operator||(value const &y) const
+  constexpr auto operator||(value const& y) const
   {
     return value{or_(value_, y.value_)};
   }
   constexpr auto operator!() const { return value{not_(value_)}; }
 
-  friend decltype(auto) operator>>(std::istream &is, value &val)
+  friend decltype(auto) operator>>(std::istream& is, value& val)
   {
     return is >> val.value_;
   }
-  friend decltype(auto) operator<<(std::ostream &os, value const &val)
+  friend decltype(auto) operator<<(std::ostream& os, value const& val)
   {
     return os << val.value_;
   }
@@ -124,7 +124,7 @@ public:
   // Construct from a function.
   template <typename Func, typename = detail::enable_if_not_same_t<
                                Func, set<In, Out, ValueType, SetTraits>>>
-  explicit set(Func &&f) : f_{std::forward<Func>(f)}
+  explicit set(Func&& f) : f_{std::forward<Func>(f)}
   {
   }
 
@@ -134,17 +134,17 @@ public:
   {
   }
 
-  template <typename U> auto operator()(U &&x) const
+  template <typename U> auto operator()(U&& x) const
   {
     return value_type{f_(std::forward<U>(x))};
   }
 
-  auto operator&(set const &t) const
+  auto operator&(set const& t) const
   {
     return set([ =, *this ](In x) { return this->and_(f_(x), t.f_(x)); });
   }
 
-  auto operator|(set const &t) const
+  auto operator|(set const& t) const
   {
     return set([ =, *this ](In x) { return this->or_(f_(x), t.f_(x)); });
   }
@@ -212,18 +212,18 @@ set(Iter, Iter)->set<In, Out>;
 
 //------------------------------------------------------------------------------
 
-template <typename Set, typename N> auto cut(Set &&s, N const &alpha)
+template <typename Set, typename N> auto cut(Set&& s, N const& alpha)
 {
   using value_type = std::decay_t<Set>::value_type;
   return set{[=](value_type x) -> value_type { return s(x) > alpha ? 1 : 0; }};
 }
 
-template <typename Set> auto core(Set &&s)
+template <typename Set> auto core(Set&& s)
 {
   using value_type = std::decay_t<Set>::value_type;
   return set{[=](value_type x) {
-    auto const zero = value_type{0};
-    auto const one = value_type{1};
+    constexpr auto zero = value_type{0};
+    constexpr auto one = value_type{1};
     auto const sx = s(x);
     if constexpr (std::is_floating_point_v<value_type>) {
       auto next = std::nextafter(sx, one);
@@ -235,7 +235,7 @@ template <typename Set> auto core(Set &&s)
   }};
 }
 
-template <typename Set> auto support(Set &&s)
+template <typename Set> auto support(Set&& s)
 {
   using value_type = std::decay_t<Set>::value_type;
   return set{
