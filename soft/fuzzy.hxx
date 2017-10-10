@@ -210,7 +210,48 @@ template <typename Iter,
           typename Out = typename VT::second_type>
 set(Iter, Iter)->set<In, Out>;
 
+<<<<<<< HEAD
 } // namespace soft::fuzzy
+=======
+//------------------------------------------------------------------------------
+
+template <typename Set, typename N> auto cut(Set&& s, N const& alpha)
+{
+  using value_type = std::decay_t<Set>::value_type;
+  return set{ [=](value_type x) -> value_type {
+    return s(x) > alpha ? 1 : 0;
+  }};
+}
+
+template <typename Set> auto core(Set&& s)
+{
+  using value_type = std::decay_t<Set>::value_type;
+  return set{ [=](value_type x) {
+    auto const zero = value_type{0};
+    auto const one = value_type{1};
+    auto const sx = s(x);
+    if constexpr (std::is_floating_point_v<value_type>) {
+      auto next = std::nextafter(sx, one);
+      return sx <= one && one <= next || next <= one && one <= xs
+	? one
+	: zero;
+    }
+    else {
+      return sx == one ? one : zero;
+    }
+  }};
+}
+
+template <typename Set> auto support(Set&& s)
+{
+  using value_type = std::decay_t<Set>::value_type;
+  return set{ [=](value_type x) {
+    return s(x) > 0 ? value_type{1} : value_type{0};
+  }};
+}
+
+} // namespace fuzzy
+>>>>>>> 8caf26ea9fe555161fe436ecf12e86fefb73d0ab
 
 #endif
 

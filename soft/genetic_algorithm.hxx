@@ -1,5 +1,8 @@
+<<<<<<< HEAD
 
 
+=======
+>>>>>>> 8caf26ea9fe555161fe436ecf12e86fefb73d0ab
 //------------------------------------------------------------------------------
 
 #ifndef BST_GA_HXX_
@@ -30,11 +33,19 @@ void sample_and_apply(Iter first, Iter last, Distance n, Generator g, Func f)
 }
 
 template <typename Iter, typename Gen, typename ScoreFunc>
-auto rejection_sample(Iter first, Iter last, Gen gen, ScoreFunc f)
+auto rejection_sample(Iter first, Iter last, Gen gen, ScoreFunc f) -> Iter
 {
   auto const num_elements = std::distance(first, last);
   auto const highest_value = *std::max_element(
+<<<<<<< HEAD
       first, last, [&](auto const &x, auto const &y) { return f(x) < f(y); });
+=======
+    first, last,
+    [&](auto const& x, auto const& y) {
+      return f(x) < f(y);
+    }
+  );
+>>>>>>> 8caf26ea9fe555161fe436ecf12e86fefb73d0ab
 
   std::uniform_int_distribution<> dist{0, num_elements - 1};
   while (true) {
@@ -72,18 +83,33 @@ auto run_genetic_algorithm(Pool const &pool, ScoreFunc f, MutateFunc m,
     scored_items.emplace_back(&item, f(item));
 
   for (int iteration = 0; iteration < traits.iterations; ++iteration) {
+
     // 1. Mutate.
     std::uniform_int_distribution<> mutate_dist{0, traits.max_mutations};
+<<<<<<< HEAD
     sample_and_apply(begin(scored_items), end(scored_items), mutate_dist(gen),
                      gen, [&](auto p) {
                        *p.first = m(*p.first); // mutate...
                        p.second = f(*p.first); // then re-score
                        return p;
                      });
+=======
+    sample_and_apply(
+      begin(scored_items), end(scored_items),
+      mutate_dist(gen),
+      gen,
+      [&](auto p) {
+	*p.first = m(*p.first);    // mutate...
+	p.second = f(*p.first);    // then re-score
+	return p;
+      }
+    );
+>>>>>>> 8caf26ea9fe555161fe436ecf12e86fefb73d0ab
 
     // 2. Crossover.
     std::uniform_int_distribution<> cross_dist{0, traits.max_crossovers};
     auto old_end = end(scored_items);
+<<<<<<< HEAD
     std::generate_n(std::back_inserter(scored_items), cross_dist(gen), [&] {
       auto picker = [&] {
         return rejection_sample(begin(scored_items), old_end, gen,
@@ -103,12 +129,50 @@ auto run_genetic_algorithm(Pool const &pool, ScoreFunc f, MutateFunc m,
         [](auto lhs, auto rhs) { return lhs.second < rhs.second; });
     scored_items.erase(std::next(begin(scored_items), size(pool)),
                        end(scored_items));
+=======
+    std::generate_n(
+      std::back_inserter(scored_items),
+      cross_dist(gen),
+      [&] {
+	auto picker = [&] {
+	  return rejection_sample(
+	    begin(scored_items), old_end,
+	    gen,
+	    [](auto const& x) { return x.second; });
+	};
+
+	auto parent_1 = picker();
+	auto parent_2 = picker();
+	auto child = c(*parent_1->first, *parent_2->first);
+	return std::pair{child, f(child)};
+      }
+    );
+
+    // Cull the pool back down to the original size.
+    std::nth_element(
+      begin(scored_items),
+      std::next(begin(scored_items), size(pool)),
+      end(scored_items),
+      [](auto lhs, auto rhs) { return lhs.second < rhs.second; }
+    );
+    scored_items.erase(
+      std::next(begin(scored_items), size(pool)),
+      end(scored_items)
+    );
+
+>>>>>>> 8caf26ea9fe555161fe436ecf12e86fefb73d0ab
   } // end of main loop.
 
   // Return the element with the highest score.
   auto p = std::max_element(
+<<<<<<< HEAD
       begin(scored_items), end(scored_items),
       [](auto lhs, auto rhs) { return lhs.second < rhs.second; });
+=======
+    begin(scored_items), end(scored_items),
+    [](auto lhs, auto rhs) { return lhs.second < rhs.second; }
+  );
+>>>>>>> 8caf26ea9fe555161fe436ecf12e86fefb73d0ab
   return *p->first;
 }
 
