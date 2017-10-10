@@ -210,9 +210,6 @@ template <typename Iter,
           typename Out = typename VT::second_type>
 set(Iter, Iter)->set<In, Out>;
 
-<<<<<<< HEAD
-} // namespace soft::fuzzy
-=======
 //------------------------------------------------------------------------------
 
 template <typename Set, typename N> auto cut(Set&& s, N const& alpha)
@@ -250,8 +247,7 @@ template <typename Set> auto support(Set&& s)
   }};
 }
 
-} // namespace fuzzy
->>>>>>> 8caf26ea9fe555161fe436ecf12e86fefb73d0ab
+} // namespace soft::fuzzy
 
 #endif
 
