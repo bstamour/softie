@@ -48,8 +48,7 @@ void sample_and_apply(Iter first, Iter last, Distance n, Generator g, Func f)
   std::vector<std::reference_wrapper<value_type>> refs;
   refs.reserve(n);
   std::sample(first, last, std::back_inserter(refs), n, g);
-  for (auto& x : refs)
-    x.get() = f(x);
+  for (auto& x : refs) x.get() = f(x);
 }
 
 template <typename Iter, typename Gen, typename ScoreFunc>
@@ -97,8 +96,7 @@ auto run_genetic_algorithm(Pool const& pool,
   // Score the initial population.
   std::vector<scored_item_type> scored_items;
   scored_items.reserve(size(pool) + traits.max_crossovers);
-  for (auto const& item : pool)
-    scored_items.emplace_back(&item, f(item));
+  for (auto const& item : pool) scored_items.emplace_back(&item, f(item));
 
   for (int iteration = 0; iteration < traits.iterations; ++iteration) {
 
