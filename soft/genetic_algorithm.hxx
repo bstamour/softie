@@ -1,8 +1,28 @@
-<<<<<<< HEAD
-
-
-=======
->>>>>>> 8caf26ea9fe555161fe436ecf12e86fefb73d0ab
+//==============================================================================
+// Copyright (c) 2017, Bryan St. Amour
+// All rights reserved.
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are met:
+//
+//   1)  Redistributions of source code must retain the above copyright notice,
+//       this list of conditions and the following disclaimer.
+//
+//   2)  Redistributions in binary form must reproduce the above copyright
+//       notice, this list of conditions and the following disclaimer in the
+//       documentation and/or other materials provided with the distribution.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+// ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+// LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+// CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+// INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+// CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+// ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+// POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 
 #ifndef BST_GA_HXX_
@@ -37,15 +57,7 @@ auto rejection_sample(Iter first, Iter last, Gen gen, ScoreFunc f) -> Iter
 {
   auto const num_elements = std::distance(first, last);
   auto const highest_value = *std::max_element(
-<<<<<<< HEAD
       first, last, [&](auto const &x, auto const &y) { return f(x) < f(y); });
-=======
-    first, last,
-    [&](auto const& x, auto const& y) {
-      return f(x) < f(y);
-    }
-  );
->>>>>>> 8caf26ea9fe555161fe436ecf12e86fefb73d0ab
 
   std::uniform_int_distribution<> dist{0, num_elements - 1};
   while (true) {
@@ -86,30 +98,16 @@ auto run_genetic_algorithm(Pool const &pool, ScoreFunc f, MutateFunc m,
 
     // 1. Mutate.
     std::uniform_int_distribution<> mutate_dist{0, traits.max_mutations};
-<<<<<<< HEAD
     sample_and_apply(begin(scored_items), end(scored_items), mutate_dist(gen),
                      gen, [&](auto p) {
                        *p.first = m(*p.first); // mutate...
                        p.second = f(*p.first); // then re-score
                        return p;
                      });
-=======
-    sample_and_apply(
-      begin(scored_items), end(scored_items),
-      mutate_dist(gen),
-      gen,
-      [&](auto p) {
-	*p.first = m(*p.first);    // mutate...
-	p.second = f(*p.first);    // then re-score
-	return p;
-      }
-    );
->>>>>>> 8caf26ea9fe555161fe436ecf12e86fefb73d0ab
 
     // 2. Crossover.
     std::uniform_int_distribution<> cross_dist{0, traits.max_crossovers};
     auto old_end = end(scored_items);
-<<<<<<< HEAD
     std::generate_n(std::back_inserter(scored_items), cross_dist(gen), [&] {
       auto picker = [&] {
         return rejection_sample(begin(scored_items), old_end, gen,
@@ -129,50 +127,12 @@ auto run_genetic_algorithm(Pool const &pool, ScoreFunc f, MutateFunc m,
         [](auto lhs, auto rhs) { return lhs.second < rhs.second; });
     scored_items.erase(std::next(begin(scored_items), size(pool)),
                        end(scored_items));
-=======
-    std::generate_n(
-      std::back_inserter(scored_items),
-      cross_dist(gen),
-      [&] {
-	auto picker = [&] {
-	  return rejection_sample(
-	    begin(scored_items), old_end,
-	    gen,
-	    [](auto const& x) { return x.second; });
-	};
-
-	auto parent_1 = picker();
-	auto parent_2 = picker();
-	auto child = c(*parent_1->first, *parent_2->first);
-	return std::pair{child, f(child)};
-      }
-    );
-
-    // Cull the pool back down to the original size.
-    std::nth_element(
-      begin(scored_items),
-      std::next(begin(scored_items), size(pool)),
-      end(scored_items),
-      [](auto lhs, auto rhs) { return lhs.second < rhs.second; }
-    );
-    scored_items.erase(
-      std::next(begin(scored_items), size(pool)),
-      end(scored_items)
-    );
-
->>>>>>> 8caf26ea9fe555161fe436ecf12e86fefb73d0ab
   } // end of main loop.
 
   // Return the element with the highest score.
   auto p = std::max_element(
-<<<<<<< HEAD
       begin(scored_items), end(scored_items),
       [](auto lhs, auto rhs) { return lhs.second < rhs.second; });
-=======
-    begin(scored_items), end(scored_items),
-    [](auto lhs, auto rhs) { return lhs.second < rhs.second; }
-  );
->>>>>>> 8caf26ea9fe555161fe436ecf12e86fefb73d0ab
   return *p->first;
 }
 
