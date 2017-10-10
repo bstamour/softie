@@ -46,9 +46,11 @@ template <template <typename...> typename TT> struct template_template {
 template <template <typename...> typename TT> using tt = template_template<TT>;
 
 // template-template detection.
-template <typename TT> struct is_template_template : std::false_type {};
+template <typename TT> struct is_template_template : std::false_type {
+};
 template <template <typename...> typename TT>
-struct is_template_template<template_template<TT>> : std::true_type {};
+struct is_template_template<template_template<TT>> : std::true_type {
+};
 
 template <typename TT>
 constexpr bool is_template_template_v = is_template_template<TT>::value;
@@ -73,7 +75,8 @@ using uniform_dist = bst::apply_types_t<
     T>;
 
 template <int N, typename Iter, typename Gen>
-auto sample_n(Iter first, Iter last, Gen g) {
+auto sample_n(Iter first, Iter last, Gen g)
+{
   using std::begin;
   std::array<typename Iter::value_type, N> values;
   std::sample(first, last, begin(values) N, g);
@@ -81,8 +84,13 @@ auto sample_n(Iter first, Iter last, Gen g) {
 }
 
 template <typename Iter, typename CR, typename D, typename F>
-auto differential_evolution(Iter first, Iter last, CR cross_prob, D weight,
-                            F fitness, std::size_t iterations) {
+auto differential_evolution(Iter first,
+                            Iter last,
+                            CR cross_prob,
+                            D weight,
+                            F fitness,
+                            std::size_t iterations)
+{
   using value_type = typename Iter::value_type;
   std::deque<value_type> solutions(first, last);
   std::mt19937 gen;
@@ -92,7 +100,7 @@ auto differential_evolution(Iter first, Iter last, CR cross_prob, D weight,
       auto x = solutions.front();
       solutions.pop_front();
 
-      auto y = x;
+      auto y        = x;
       auto[a, b, c] = sample_n<3>(begin(solutions), end(solutions), gen);
 
       uniform_dist<std::size_t> dist_r{0, size(x) - 1};
@@ -101,8 +109,7 @@ auto differential_evolution(Iter first, Iter last, CR cross_prob, D weight,
       uniform_dist<CR> dist_cr{0, 1};
       for (std::size_t i{}; i < size(x); ++i) {
         auto ri = dist_cr(gen);
-        if (ri < cross_prob || i == r)
-          y[i] = a[i] + weight * (b[i] - c[i]);
+        if (ri < cross_prob || i == r) y[i] = a[i] + weight * (b[i] - c[i]);
       }
 
       solutions.push_back(fitness(y) > fitness(x) ? y : x);
@@ -110,8 +117,9 @@ auto differential_evolution(Iter first, Iter last, CR cross_prob, D weight,
   }
 
   return *std::max_element(
-      begin(solutions), end(solutions),
-      [&](auto const &x, auto const &y) { return fitness(x) < fitness(y); });
+      begin(solutions), end(solutions), [&](auto const& x, auto const& y) {
+        return fitness(x) < fitness(y);
+      });
 }
 
 } // namespace soft::de

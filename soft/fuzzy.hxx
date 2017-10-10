@@ -115,15 +115,18 @@ private:
 
 //------------------------------------------------------------------------------
 
-template <typename In, typename Out, typename ValueType = value<Out>,
+template <typename In,
+          typename Out,
+          typename ValueType                     = value<Out>,
           template <typename> typename SetTraits = traits::min_max>
 class set final : private SetTraits<Out> {
 public:
   using value_type = ValueType;
 
   // Construct from a function.
-  template <typename Func, typename = detail::enable_if_not_same_t<
-                               Func, set<In, Out, ValueType, SetTraits>>>
+  template <typename Func,
+            typename = detail::
+                enable_if_not_same_t<Func, set<In, Out, ValueType, SetTraits>>>
   explicit set(Func&& f) : f_{std::forward<Func>(f)}
   {
   }
@@ -163,7 +166,9 @@ private:
 
 //------------------------------------------------------------------------------
 
-template <typename In, typename Out, typename V,
+template <typename In,
+          typename Out,
+          typename V,
           template <typename> typename ST>
 template <typename Iter>
 constexpr auto set<In, Out, V, ST>::make_indexed_function(Iter first, Iter last)
@@ -199,9 +204,10 @@ struct inspect_functor<Out (G::*)(In)> {
 
 template <typename In, typename Out> set(Out (*)(In))->set<In, Out>;
 
-template <
-    typename F, typename T = detail::inspect_functor<decltype(&F::operator())>,
-    typename In = typename T::in_type, typename Out = typename T::out_type>
+template <typename F,
+          typename T   = detail::inspect_functor<decltype(&F::operator())>,
+          typename In  = typename T::in_type,
+          typename Out = typename T::out_type>
 set(F)->set<In, Out>;
 
 template <typename Iter,
