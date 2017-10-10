@@ -184,13 +184,13 @@ template <typename F> struct inspect_functor;
 
 template <typename G, typename In, typename Out>
 struct inspect_functor<Out (G::*)(In) const> {
-  using in_type = In;
+  using in_type  = In;
   using out_type = Out;
 };
 
 template <typename G, typename In, typename Out>
 struct inspect_functor<Out (G::*)(In)> {
-  using in_type = In;
+  using in_type  = In;
   using out_type = Out;
 };
 } // namespace detail
@@ -205,8 +205,8 @@ template <
 set(F)->set<In, Out>;
 
 template <typename Iter,
-          typename VT = typename std::iterator_traits<Iter>::value_type,
-          typename In = typename VT::first_type,
+          typename VT  = typename std::iterator_traits<Iter>::value_type,
+          typename In  = typename VT::first_type,
           typename Out = typename VT::second_type>
 set(Iter, Iter)->set<In, Out>;
 
@@ -223,8 +223,8 @@ template <typename Set> auto core(Set&& s)
   using value_type = std::decay_t<Set>::value_type;
   return set{[=](value_type x) {
     constexpr auto zero = value_type{0};
-    constexpr auto one = value_type{1};
-    auto const sx = s(x);
+    constexpr auto one  = value_type{1};
+    auto const sx       = s(x);
     if constexpr (std::is_floating_point_v<value_type>) {
       auto next = std::nextafter(sx, one);
       return sx <= one && one <= next || next <= one && one <= xs ? one : zero;

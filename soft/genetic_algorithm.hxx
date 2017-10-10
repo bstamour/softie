@@ -48,20 +48,20 @@ void sample_and_apply(Iter first, Iter last, Distance n, Generator g, Func f)
   std::vector<std::reference_wrapper<value_type>> refs;
   refs.reserve(n);
   std::sample(first, last, std::back_inserter(refs), n, g);
-  for (auto &x : refs)
+  for (auto& x : refs)
     x.get() = f(x);
 }
 
 template <typename Iter, typename Gen, typename ScoreFunc>
 auto rejection_sample(Iter first, Iter last, Gen gen, ScoreFunc f) -> Iter
 {
-  auto const num_elements = std::distance(first, last);
+  auto const num_elements  = std::distance(first, last);
   auto const highest_value = *std::max_element(
-      first, last, [&](auto const &x, auto const &y) { return f(x) < f(y); });
+      first, last, [&](auto const& x, auto const& y) { return f(x) < f(y); });
 
   std::uniform_int_distribution<> dist{0, num_elements - 1};
   while (true) {
-    auto pos = std::next(first, dist(gen)); // Move to a random element.
+    auto pos         = std::next(first, dist(gen)); // Move to a random element.
     using value_type = decltype(highest_value);
     std::uniform_real_distribution<value_type> val_dist{0, highest_value};
     auto y = val_dist(gen); // sample.
@@ -80,18 +80,18 @@ struct algorithm_traits {
 
 template <typename Pool, typename ScoreFunc, typename MutateFunc,
           typename CrossoverFunc, typename Generator>
-auto run_genetic_algorithm(Pool const &pool, ScoreFunc f, MutateFunc m,
+auto run_genetic_algorithm(Pool const& pool, ScoreFunc f, MutateFunc m,
                            CrossoverFunc c, Generator gen,
-                           algorithm_traits const &traits)
+                           algorithm_traits const& traits)
 {
-  using item_type = typename std::remove_reference_t<Pool>::value_type;
-  using score_type = decltype(f(std::declval<item_type &>()));
-  using scored_item_type = std::pair<item_type *, score_type>;
+  using item_type        = typename std::remove_reference_t<Pool>::value_type;
+  using score_type       = decltype(f(std::declval<item_type&>()));
+  using scored_item_type = std::pair<item_type*, score_type>;
 
   // Score the initial population.
   std::vector<scored_item_type> scored_items;
   scored_items.reserve(size(pool) + traits.max_crossovers);
-  for (auto const &item : pool)
+  for (auto const& item : pool)
     scored_items.emplace_back(&item, f(item));
 
   for (int iteration = 0; iteration < traits.iterations; ++iteration) {
@@ -111,12 +111,12 @@ auto run_genetic_algorithm(Pool const &pool, ScoreFunc f, MutateFunc m,
     std::generate_n(std::back_inserter(scored_items), cross_dist(gen), [&] {
       auto picker = [&] {
         return rejection_sample(begin(scored_items), old_end, gen,
-                                [](auto const &x) { return x.second; });
+                                [](auto const& x) { return x.second; });
       };
 
       auto parent_1 = picker();
       auto parent_2 = picker();
-      auto child = c(*parent_1->first, *parent_2->first);
+      auto child    = c(*parent_1->first, *parent_2->first);
       return std::pair{child, f(child)};
     });
 
