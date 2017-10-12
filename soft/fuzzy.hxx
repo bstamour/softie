@@ -242,6 +242,19 @@ template <typename Set> auto support(Set&& s)
       [=](value_type x) { return s(x) > 0 ? value_type{1} : value_type{0}; }};
 }
 
+template <typename T>
+auto triangular_number(T const& center, T const& left, T const& right)
+{
+  return set{[=](T x) {
+    if (a - left <= t && t <= a)
+      return T{1} - (a - t) / left;
+    else if (a <= t && t <= a + right)
+      return T{1} - (t - a) / right;
+    else
+      return 0;
+  }};
+}
+
 } // namespace soft::fuzzy
 
 #endif
