@@ -77,16 +77,10 @@ struct algorithm_traits {
   int max_crossovers;
 };
 
-template <typename Pool,
-          typename ScoreFunc,
-          typename MutateFunc,
-          typename CrossoverFunc,
-          typename Generator>
-auto run_genetic_algorithm(Pool const& pool,
-                           ScoreFunc f,
-                           MutateFunc m,
-                           CrossoverFunc c,
-                           Generator gen,
+template <typename Pool, typename ScoreFunc, typename MutateFunc,
+          typename CrossoverFunc, typename Generator>
+auto run_genetic_algorithm(Pool const& pool, ScoreFunc f, MutateFunc m,
+                           CrossoverFunc c, Generator gen,
                            algorithm_traits const& traits)
 {
   using item_type        = typename std::remove_reference_t<Pool>::value_type;
@@ -102,11 +96,8 @@ auto run_genetic_algorithm(Pool const& pool,
 
     // 1. Mutate.
     std::uniform_int_distribution<> mutate_dist{0, traits.max_mutations};
-    sample_and_apply(begin(scored_items),
-                     end(scored_items),
-                     mutate_dist(gen),
-                     gen,
-                     [&](auto p) {
+    sample_and_apply(begin(scored_items), end(scored_items), mutate_dist(gen),
+                     gen, [&](auto p) {
                        *p.first = m(*p.first); // mutate...
                        p.second = f(*p.first); // then re-score
                        return p;
@@ -117,9 +108,7 @@ auto run_genetic_algorithm(Pool const& pool,
     auto old_end = end(scored_items);
     std::generate_n(std::back_inserter(scored_items), cross_dist(gen), [&] {
       auto picker = [&] {
-        return rejection_sample(begin(scored_items),
-                                old_end,
-                                gen,
+        return rejection_sample(begin(scored_items), old_end, gen,
                                 [](auto const& x) { return x.second; });
       };
 
@@ -131,8 +120,7 @@ auto run_genetic_algorithm(Pool const& pool,
 
     // Cull the pool back down to the original size.
     std::nth_element(
-        begin(scored_items),
-        std::next(begin(scored_items), size(pool)),
+        begin(scored_items), std::next(begin(scored_items), size(pool)),
         end(scored_items),
         [](auto lhs, auto rhs) { return lhs.second < rhs.second; });
     scored_items.erase(std::next(begin(scored_items), size(pool)),
@@ -141,9 +129,8 @@ auto run_genetic_algorithm(Pool const& pool,
 
   // Return the element with the highest score.
   auto p = std::max_element(
-      begin(scored_items), end(scored_items), [](auto lhs, auto rhs) {
-        return lhs.second < rhs.second;
-      });
+      begin(scored_items), end(scored_items),
+      [](auto lhs, auto rhs) { return lhs.second < rhs.second; });
   return *p->first;
 }
 
