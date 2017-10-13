@@ -45,10 +45,10 @@ template <typename Iter, typename Distance, typename Generator, typename Func>
 void sample_and_apply(Iter first, Iter last, Distance n, Generator g, Func f)
 {
   using value_type = typename std::remove_reference_t<Iter>::value_type;
-  std::vector<std::reference_wrapper<value_type>> refs;
+  auto refs        = std::vector<value_type*>{};
   refs.reserve(n);
   std::sample(first, last, std::back_inserter(refs), n, g);
-  for (auto& x : refs) x.get() = f(x);
+  for (auto& x : refs) *x = f(*x);
 }
 
 template <typename Iter, typename Gen, typename ScoreFunc>
@@ -57,12 +57,13 @@ auto rejection_sample(Iter first, Iter last, Gen gen, ScoreFunc f) -> Iter
   auto const num_elements  = std::distance(first, last);
   auto const highest_value = *std::max_element(
       first, last, [&](auto const& x, auto const& y) { return f(x) < f(y); });
+  auto dist        = std::uniform_int_distribution<>{0, num_elements - 1};
+  using value_type = decltype(highest_value);
 
-  std::uniform_int_distribution<> dist{0, num_elements - 1};
   while (true) {
-    auto pos         = std::next(first, dist(gen)); // Move to a random element.
-    using value_type = decltype(highest_value);
-    std::uniform_real_distribution<value_type> val_dist{0, highest_value};
+    auto pos = std::next(first, dist(gen)); // Move to a random element.
+    auto val_dist =
+        std::uniform_real_distribution<value_type>{0, highest_value};
     auto y = val_dist(gen); // sample.
     if (y < f(*pos))        // accept or reject.
       return *pos;
@@ -88,14 +89,14 @@ auto run_genetic_algorithm(Pool const& pool, ScoreFunc f, MutateFunc m,
   using scored_item_type = std::pair<item_type*, score_type>;
 
   // Score the initial population.
-  std::vector<scored_item_type> scored_items;
+  auto scored_items = std::vector<scored_item_type> {}
   scored_items.reserve(size(pool) + traits.max_crossovers);
   for (auto const& item : pool) scored_items.emplace_back(&item, f(item));
 
-  for (int iteration = 0; iteration < traits.iterations; ++iteration) {
+  for (auto iteration = 0; iteration < traits.iterations; ++iteration) {
 
     // 1. Mutate.
-    std::uniform_int_distribution<> mutate_dist{0, traits.max_mutations};
+    auto mutate_dist = std::uniform_int_distribution<>{0, traits.max_mutations};
     sample_and_apply(begin(scored_items), end(scored_items), mutate_dist(gen),
                      gen, [&](auto p) {
                        *p.first = m(*p.first); // mutate...
@@ -104,8 +105,8 @@ auto run_genetic_algorithm(Pool const& pool, ScoreFunc f, MutateFunc m,
                      });
 
     // 2. Crossover.
-    std::uniform_int_distribution<> cross_dist{0, traits.max_crossovers};
-    auto old_end = end(scored_items);
+    auto cross_dist = std::uniform_int_distribution<>{0, traits.max_crossovers};
+    auto old_end    = end(scored_items);
     std::generate_n(std::back_inserter(scored_items), cross_dist(gen), [&] {
       auto picker = [&] {
         return rejection_sample(begin(scored_items), old_end, gen,
